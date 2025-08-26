@@ -3,6 +3,9 @@ import cors from 'cors';
 
 //routes
 import healthCheckRouter from './routes/healthcheck.routes.js';
+import authRouter from './routes/auth.routes.js'
+
+
 
 const app = express();
 
@@ -21,10 +24,10 @@ app.use(cors({
 }))
 
 app.use("/api/v1/healthcheck", healthCheckRouter);
-
-app.get('/', (req,res)=>{
-  res.send("hellow");
-})
+app.use('/api/v1/auth', authRouter)
+// app.get('/', (req,res)=>{
+//   res.send("hellow");
+// })
 
 
 
