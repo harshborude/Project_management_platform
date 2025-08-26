@@ -9,7 +9,15 @@ return [
 ]
 }
 
+const userLoginValidator = () =>{
+    return [
+            body("email").trim().notEmpty().withMessage("email is required").isEmail().withMessage("Email is invalid"),
+            body("password").notEmpty().withMessage("Password is required"),
+             body("username").optional(),
+    ]
+}
 
 export {
-    userRegisterValidator
+    userRegisterValidator,
+    userLoginValidator
 }

@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-
+import cookieParser from 'cookie-parser';
 //routes
 import healthCheckRouter from './routes/healthcheck.routes.js';
 import authRouter from './routes/auth.routes.js'
@@ -23,6 +23,10 @@ app.use(cors({
     allowedHeaders : ["Content-Type", "Authorization"],
 }))
 
+
+app.use(cookieParser);
+
+//Routes
 app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use('/api/v1/auth', authRouter)
 // app.get('/', (req,res)=>{
