@@ -133,8 +133,59 @@ const getTaskById = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, task[0], "Task fetched successfully"));
 });
+
 const updateTask = asyncHandler(async (req, res) => {
-  //chai
+  const { taskId } = req.params;
+  const { title, description, assignedTo, status } = req.body;
+  const files = req.files || [];
+
+  // Find the task by ID first
+  const task = await Task.findById(taskId);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found");
+  }
+
+  // Authorization check: Only the user who assigned the task can update it
+  if (task.assignedBy.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not authorized to update this task");
+  }
+
+  // Create an object with the fields to be updated
+  const updatedFields = {
+    title: title || task.title,
+    description: description || task.description,
+    status: status || task.status,
+  };
+
+  // If a new user is being assigned, update the assignedTo field
+  if (assignedTo) {
+    updatedFields.assignedTo = new mongoose.Types.ObjectId(assignedTo);
+  } else {
+    // If assignedTo is explicitly set to null/undefined, clear it
+    updatedFields.assignedTo = null;
+  }
+
+  // Process new attachments
+  const newAttachments = files.map((file) => ({
+    url: `${process.env.SERVER_URL}/images/${file.originalname}`,
+    mimetype: file.mimetype,
+    size: file.size,
+  }));
+
+  // Append new attachments to the existing ones
+  updatedFields.attachments = [...task.attachments, ...newAttachments];
+
+  // Update the task in the database
+  const updatedTask = await Task.findByIdAndUpdate(
+    taskId,
+    { $set: updatedFields },
+    { new: true, runValidators: true }
+  ).populate("assignedTo", "avatar username fullName");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedTask, "Task updated successfully"));
 });
 const deleteTask = asyncHandler(async (req, res) => {
   //chai
